@@ -21,6 +21,7 @@ namespace AssessmentApi.Services
         public async Task<bool> addUserPolicyDetails(UserPolicyListDto userPolicyListDto)
         {
             var res = await dataContext.portaluser.FirstOrDefaultAsync(p => p.UserName == userPolicyListDto.UserName);
+            
             var result = new UserPolicyList
             {
                 Id = Guid.NewGuid(),
