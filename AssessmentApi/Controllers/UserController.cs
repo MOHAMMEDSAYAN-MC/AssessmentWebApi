@@ -19,7 +19,7 @@ namespace AssessmentApi.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> ValidateCredentials(PortalUser portaluser)
+        public async Task<IActionResult> ValidateCredentials([FromBody] PortalUser portaluser)
         {
             try
             {
@@ -34,8 +34,8 @@ namespace AssessmentApi.Controllers
             }
         }
 
-        [HttpGet("validatePolicy")]
-        public async Task<IActionResult> ValidatePolicyNumber(int policynumber)
+        [HttpGet("validatePolicy/{policynumber}")]
+        public async Task<IActionResult> ValidatePolicyNumber([FromRoute] int policynumber)
         {
             try
             {
@@ -54,8 +54,8 @@ namespace AssessmentApi.Controllers
 
         }
 
-        [HttpGet("validateChasis")]
-        public async Task<IActionResult> ValidateChasisNumber(string chasisnumber)
+        [HttpGet("validateChasis/{chasisnumber}")]
+        public async Task<IActionResult> ValidateChasisNumber([FromRoute] string chasisnumber)
         {
             try
             {
@@ -76,11 +76,11 @@ namespace AssessmentApi.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddUserPolicyDetails(UserPolicyListDto userPolicyListDto)
+        public async Task<IActionResult> AddUserPolicyDetails([FromBody] UserPolicyListDto userPolicyListDto)
         {
             try
             {
-                var result=await userInterface.addUserPolicyDetails(userPolicyListDto);
+                var result = await userInterface.addUserPolicyDetails(userPolicyListDto);
                 return Ok(result);
 
             }
@@ -108,8 +108,8 @@ namespace AssessmentApi.Controllers
             }
         }
 
-        [HttpGet("InsuredDetails")]
-        public async Task<IActionResult> GetInsuredDetails(int policynumber)
+        [HttpGet("InsuredDetails/{policynumber}")]
+        public async Task<IActionResult> GetInsuredDetails([FromRoute] int policynumber)
         {
             try
             {
@@ -121,8 +121,8 @@ namespace AssessmentApi.Controllers
                 return StatusCode(500, "Error occurred when fetching Insured Details");
             }
         }
-        [HttpDelete]
-        public async Task<IActionResult> DeleteUserPolicyRecord(int policynumber)
+        [HttpDelete("{policynumber}")]
+        public async Task<IActionResult> DeleteUserPolicyRecord([FromRoute] int policynumber)
         {
             try
             {
