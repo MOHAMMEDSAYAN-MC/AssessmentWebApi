@@ -14,8 +14,8 @@ builder.Services.AddSwaggerGen();
 var connection = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<DataContext>(o => o.UseMySql(connection, ServerVersion.AutoDetect(connection)));
 
-var neww = builder.Configuration.GetConnectionString("Default2");
-builder.Services.AddDbContext<ServerContext>(o => o.UseMySql(neww, ServerVersion.AutoDetect(neww)));
+var connection2 = builder.Configuration.GetConnectionString("Default2");
+builder.Services.AddDbContext<ServerContext>(o => o.UseMySql(connection2, ServerVersion.AutoDetect(connection2)));
 
 
 builder.Services.AddScoped<IUserInterface, UserRepository>();
