@@ -1,9 +1,7 @@
 ﻿using AssessmentApi.Data;
-using AssessmentApi.Model;
 using AssessmentApi.Models;
 using AssessmentApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace AssessmentApi.Services
 {
@@ -18,31 +16,40 @@ namespace AssessmentApi.Services
             this.serverContext = serverContext;
         }
 
-        public async Task<bool> addUserPolicyDetails(UserPolicyListDto userPolicyListDto)
+        public async Task<bool> AddUserPolicyDetails(UserPolicyListDto userPolicyListDto)
         {
-            var res = await dataContext.portaluser.FirstOrDefaultAsync(p => p.UserName == userPolicyListDto.UserName);
-            
+            var existingRecord = await dataContext.userpolicylist.FirstOrDefaultAsync(u => u.PolicyNumber ==userPolicyListDto.PolicyNumber && u.UserId==userPolicyListDto.UserId);
+
+            if (existingRecord != null)
+            {
+                return false;
+            }
             var result = new UserPolicyList
             {
                 Id = Guid.NewGuid(),
-                UserId = res.Id,
+                UserId = userPolicyListDto.UserId,
                 PolicyNumber = userPolicyListDto.PolicyNumber
 
             };
             await dataContext.userpolicylist.AddAsync(result);
             await dataContext.SaveChangesAsync();
             return true;
+
         }
 
-        public async Task<bool> deleteUserPolicy(int policynumber)
+        public async Task<bool> DeleteUserPolicy(UserPolicyListDto userPolicyListDto)
         {
-            var record= await dataContext.userpolicylist.FirstOrDefaultAsync(u=>u.PolicyNumber == policynumber);
+            var record= await dataContext.userpolicylist.FirstOrDefaultAsync(u=>u.PolicyNumber == userPolicyListDto.PolicyNumber && u.UserId == userPolicyListDto.UserId);
+            if(record == null)
+            {
+                return false;
+            }
             dataContext.userpolicylist.Remove(record);
             await dataContext.SaveChangesAsync();
             return true;
         }
 
-        public async Task<object> getInsuredDetails(int policynumber)
+        public async Task<object?> GetInsuredDetails(int policynumber)
         {
            
 
@@ -54,8 +61,10 @@ namespace AssessmentApi.Services
                     polins => polins.PolicyId,
                     (pol, polins) => new { Policy = pol, PolicyInsured = polins })
                     .FirstOrDefaultAsync();
-
-
+            if (policyDetails == null)
+            {
+                return null;
+            }
             var insuredDetails = await serverContext.Insureds
                 .Where(ins => ins.InsuredId == policyDetails.PolicyInsured.InsuredId)
                 .Join(
@@ -87,9 +96,10 @@ namespace AssessmentApi.Services
 
         }
 
-        public async Task<IEnumerable<int>> getPolicyNumbers()
+        public async Task<IEnumerable<int>?> GetPolicyNumbers(Guid userId)
         {
             var result = await dataContext.userpolicylist
+                .Where(up => up.UserId == userId)
                 .Select(up => up.PolicyNumber)
                 .ToListAsync();
             if (result.Any())
@@ -99,17 +109,17 @@ namespace AssessmentApi.Services
             return null;
         }
 
-        public async Task<bool> validateCredentials(PortalUser portalUser)
+        public async Task<bool> ValidateCredentials(PortalUser portalUser)
         {
-            var rec = await dataContext.portaluser.FirstOrDefaultAsync(a => a.UserName == portalUser.UserName && a.Password == portalUser.Password);
-            if (rec == null)
+            var record = await dataContext.portaluser.FirstOrDefaultAsync(a => a.UserName == portalUser.UserName && a.Password == portalUser.Password);
+            if (record == null)
             {
                 return false;
             }
             return true;
         }
 
-        public async Task<bool> validateChasisNumber(string chasisnumber)
+        public async Task<bool> ValidateChasisNumber(string chasisnumber)
         {
             var record = await serverContext.Vehicles.FirstOrDefaultAsync(v => v.ChasisNumber == chasisnumber);
             if (record == null)
@@ -119,7 +129,7 @@ namespace AssessmentApi.Services
             return true;
         }
 
-        public async Task<bool> validatePolicyNumber(int policynumber)
+        public async Task<bool> ValidatePolicyNumber(int policynumber)
         {
             var record=await serverContext.Policies.FirstOrDefaultAsync(p=>p.PolicyNumber == policynumber);
             if (record == null)
@@ -127,6 +137,12 @@ namespace AssessmentApi.Services
                 return false;
             }
             return true;
+        }
+
+        public async Task<Guid> GetUserId(string Username)
+        {
+            var userRecord=await dataContext.portaluser.FirstOrDefaultAsync(p=>p.UserName == Username);
+            return userRecord == null ? Guid.Empty : userRecord.Id;
         }
     }
 }

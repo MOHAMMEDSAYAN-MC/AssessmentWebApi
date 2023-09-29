@@ -19,12 +19,12 @@ namespace AssessmentApi.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> ValidateCredentials([FromBody] PortalUser portaluser)
+        public async Task<IActionResult> ValidateUserPortalCredentials([FromBody] PortalUser portaluser)
         {
             try
             {
-                var rec = await userInterface.validateCredentials(portaluser);
-                if (rec == true)
+                var result = await userInterface.ValidateCredentials(portaluser);
+                if (result == true)
                     return Ok(true);
                 return Ok(false);
             }
@@ -34,12 +34,30 @@ namespace AssessmentApi.Controllers
             }
         }
 
+
+
+
+
+        [HttpGet("{username}")]
+        public async Task<IActionResult> GetUserIdByUsername([FromRoute] string username)
+        {
+            try
+            {
+                var userId=await userInterface.GetUserId(username);
+                return Ok(userId);
+            }
+            catch
+            {
+                return StatusCode(500, "Error occurred when fetching userId");
+            }
+        }
+
         [HttpGet("validatePolicy/{policynumber}")]
         public async Task<IActionResult> ValidatePolicyNumber([FromRoute] int policynumber)
         {
             try
             {
-                var record = await userInterface.validatePolicyNumber(policynumber);
+                var record = await userInterface.ValidatePolicyNumber(policynumber);
                 if (record == true) {
                     return Ok(true);
                 }
@@ -59,7 +77,7 @@ namespace AssessmentApi.Controllers
         {
             try
             {
-                var record = await userInterface.validateChasisNumber(chasisnumber);
+                var record = await userInterface.ValidateChasisNumber(chasisnumber);
                 if (record == true)
                 {
                     return Ok(true);
@@ -80,7 +98,9 @@ namespace AssessmentApi.Controllers
         {
             try
             {
-                var result = await userInterface.addUserPolicyDetails(userPolicyListDto);
+                
+
+                var result = await userInterface.AddUserPolicyDetails(userPolicyListDto);
                 return Ok(result);
 
             }
@@ -91,14 +111,16 @@ namespace AssessmentApi.Controllers
         }
 
 
-        [HttpGet("policyNumber")]
-        public async Task<IActionResult> GetPolicyNumbers()
+        [HttpGet("policyNumber/{UserId}")]
+        public async Task<IActionResult?> GetPolicyNumbers([FromRoute]Guid UserId)
         {
             try
             {
-                var result = await userInterface.getPolicyNumbers();
+
+                var result = await userInterface.GetPolicyNumbers(UserId);
+
                 if (result == null)
-                    return Ok(new { message = "No Content" });
+                    return Ok(new int[0]);
                 return Ok(result);
             }
             catch
@@ -113,7 +135,7 @@ namespace AssessmentApi.Controllers
         {
             try
             {
-                var record = await userInterface.getInsuredDetails(policynumber);
+                var record = await userInterface.GetInsuredDetails(policynumber);
                 return Ok(record);
             }
             catch
@@ -121,12 +143,12 @@ namespace AssessmentApi.Controllers
                 return StatusCode(500, "Error occurred when fetching Insured Details");
             }
         }
-        [HttpDelete("{policynumber}")]
-        public async Task<IActionResult> DeleteUserPolicyRecord([FromRoute] int policynumber)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUserPolicyRecord([FromBody]UserPolicyListDto userPolicyListDto)
         {
             try
             {
-                var result=await userInterface.deleteUserPolicy(policynumber);
+                var result=await userInterface.DeleteUserPolicy(userPolicyListDto);
                 return Ok(result);
             }
             catch 

@@ -4,19 +4,20 @@ namespace AssessmentApi.Services.Interfaces
 {
     public interface IUserInterface
     {
-        public Task<bool> validateCredentials(PortalUser portalUser);
+        public Task<Guid> GetUserId(string Username);
+        public Task<bool> ValidateCredentials(PortalUser portalUser);
 
-        public Task<bool> validatePolicyNumber(int policyNumber);
+        public Task<bool> ValidatePolicyNumber(int policyNumber);
 
-        public Task<bool> validateChasisNumber(string chasisnumber);
+        public Task<bool> ValidateChasisNumber(string chasisnumber);
 
-        public Task<bool> addUserPolicyDetails(UserPolicyListDto userPolicyListDto);
+        public Task<bool> AddUserPolicyDetails(UserPolicyListDto userPolicyListDto);
 
-        public Task<IEnumerable<int>> getPolicyNumbers();
+        public Task<IEnumerable<int>?> GetPolicyNumbers(Guid userId);
 
-        public Task<object> getInsuredDetails(int policynumber);
+        public Task<object?> GetInsuredDetails(int policynumber);
 
-        public Task<bool> deleteUserPolicy(int policynumber);
+        public Task<bool> DeleteUserPolicy(UserPolicyListDto userPolicyListDto);
 
 
 

@@ -1,4 +1,4 @@
-﻿using AssessmentApi.Model;
+﻿using AssessmentApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AssessmentApi.Data;

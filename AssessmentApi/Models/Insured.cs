@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AssessmentApi.Model;
+namespace AssessmentApi.Models;
 
 public partial class Insured
 {

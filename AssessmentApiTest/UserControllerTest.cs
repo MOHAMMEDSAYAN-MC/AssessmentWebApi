@@ -23,71 +23,120 @@ namespace AssessmentApiTest
 
         }
 
-        //ValidateCredentials
+        //ValidateUserPortalCredentials
 
         [Fact]
-        public async void ValidateCredentials_ValidCredentials_ReturnsTrue()
+        public async void ValidateUserPortalCredentials_ReturnsOkWithTrue_WhenValidCredentials()
         {
             // Arrange
             var credential = fixture.Create<PortalUser>();
-            userInterface.Setup(u => u.validateCredentials(credential)).ReturnsAsync(true);
+            userInterface.Setup(u => u.ValidateCredentials(credential)).ReturnsAsync(true);
 
             // Act
-            var result = await userController.ValidateCredentials(credential);
+            var result = await userController.ValidateUserPortalCredentials(credential);
 
             // Assert
             result.Should().NotBeNull();
             result.Should().BeAssignableTo<IActionResult>();
             result.Should().BeOfType<OkObjectResult>().Which.Value.Should().Be(true);
 
-            userInterface.Verify(t => t.validateCredentials(credential), Times.Once());
+            userInterface.Verify(t => t.ValidateCredentials(credential), Times.Once());
         }
 
         [Fact]
-        public async Task ValidateCredentials_InvalidCredentials_ReturnsFalse()
+        public async Task ValidateUserPortalCredentials_ReturnsOkWithFalse_WhenInvalidCredentials()
         {
             // Arrange
             var credential = fixture.Create<PortalUser>();
-            userInterface.Setup(u => u.validateCredentials(credential)).ReturnsAsync(false);
+            userInterface.Setup(u => u.ValidateCredentials(credential)).ReturnsAsync(false);
 
             // Act
-            var result = await userController.ValidateCredentials(credential);
+            var result = await userController.ValidateUserPortalCredentials(credential);
 
             // Assert
             result.Should().NotBeNull();
             result.Should().BeAssignableTo<IActionResult>();
             result.Should().BeOfType<OkObjectResult>().Which.Value.Should().Be(false);
 
-            userInterface.Verify(t => t.validateCredentials(credential), Times.Once());
+            userInterface.Verify(t => t.ValidateCredentials(credential), Times.Once());
         }
 
         [Fact]
-        public async Task ValidateCredentials_ExceptionThrown_ReturnsInternalServerError()
+        public async Task ValidateUserPortalCredentials_ReturnsInternalServerError_WhenExceptionThrown()
         {
             // Arrange
             var credential = fixture.Create<PortalUser>();
-            userInterface.Setup(u => u.validateCredentials(credential)).ThrowsAsync(new Exception());
+            userInterface.Setup(u => u.ValidateCredentials(credential)).ThrowsAsync(new Exception());
 
             // Act
-            var result = await userController.ValidateCredentials(credential);
+            var result = await userController.ValidateUserPortalCredentials(credential);
 
             // Assert
             result.Should().NotBeNull();
             result.Should().BeAssignableTo<ObjectResult>();
             var objectResult = result as ObjectResult;
-            objectResult.StatusCode.Should().Be(500);
-            objectResult.Value.Should().Be("Error occurred when validating  credentials");
+            objectResult?.StatusCode.Should().Be(500);
+            objectResult?.Value.Should().Be("Error occurred when validating  credentials");
 
-            userInterface.Verify(t=>t.validateCredentials(credential), Times.Once());
+            userInterface.Verify(t=>t.ValidateCredentials(credential), Times.Once());
         }
+
+
+
+        //GetUserIdByUsername
+
+        [Fact]
+        public async Task GetUserIdByUsername_ReturnsOkWithUserId_WhenValidUsername()
+        {
+            // Arrange
+            var username = fixture.Create<string>();
+            var userId = fixture.Create<Guid>();
+            userInterface.Setup(u => u.GetUserId(username)).ReturnsAsync(userId);
+
+            // Act
+            var result = await userController.GetUserIdByUsername(username);
+
+            // Assert
+            result.Should().NotBeNull().And.BeAssignableTo<IActionResult>();
+            result.Should().BeOfType<OkObjectResult>().Which.Value.Should().Be(userId);
+
+
+            userInterface.Verify(t => t.GetUserId(username), Times.Once());
+        }
+
+
+        [Fact]
+        public async Task GetUserIdByUsername_ReturnsInternalServerError_WhenExceptionThrown()
+        {
+            // Arrange
+            var username = fixture.Create<string>();
+            userInterface.Setup(u => u.GetUserId(username)).ThrowsAsync(new Exception());
+
+            // Act
+            var result = await userController.GetUserIdByUsername(username);
+
+            // Assert
+            result.Should().NotBeNull().And.BeAssignableTo<ObjectResult>();
+            var objectResult = result as ObjectResult;
+            objectResult?.StatusCode.Should().Be(500);
+            objectResult?.Value.Should().Be("Error occurred when fetching userId");
+
+            userInterface.Verify(t => t.GetUserId(username), Times.Once());
+        }
+
+
+
+
+
+
 
         //ValidatePolicyNumber
         [Fact]
-        public async Task ValidatePolicyNumber_WhenValidPolicyNumber_ReturnsTrue()
+        public async Task ValidatePolicyNumber_ReturnsOkWithTrue_WhenValidPolicyNumber()
         {
             // Arrange
             var policyNumber = fixture.Create<int>();
-            userInterface.Setup(u => u.validatePolicyNumber(policyNumber)).ReturnsAsync(true);
+            userInterface.Setup(u => u.ValidatePolicyNumber(policyNumber)).ReturnsAsync(true);
 
             // Act
             var result = await userController.ValidatePolicyNumber(policyNumber);
@@ -97,18 +146,18 @@ namespace AssessmentApiTest
             result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().BeEquivalentTo(true);
 
-            userInterface.Verify(t => t.validatePolicyNumber(policyNumber), Times.Once());
+            userInterface.Verify(t => t.ValidatePolicyNumber(policyNumber), Times.Once());
         }
 
 
 
 
         [Fact]
-        public async Task ValidatePolicyNumber_WhenInvalidPolicyNumber_ReturnsFalse()
+        public async Task ValidatePolicyNumber_ReturnsOkWithFalse_WhenInvalidPolicyNumber()
         {
             // Arrange
             var policyNumber = fixture.Create<int>();
-            userInterface.Setup(u => u.validatePolicyNumber(policyNumber)).ReturnsAsync(false);
+            userInterface.Setup(u => u.ValidatePolicyNumber(policyNumber)).ReturnsAsync(false);
 
             // Act
             var result = await userController.ValidatePolicyNumber(policyNumber);
@@ -118,15 +167,15 @@ namespace AssessmentApiTest
             result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().BeEquivalentTo(false);
 
-            userInterface.Verify(t => t.validatePolicyNumber(policyNumber), Times.Once());
+            userInterface.Verify(t => t.ValidatePolicyNumber(policyNumber), Times.Once());
         }
 
         [Fact]
-        public async Task ValidatePolicyNumber_ExceptionThrown_ReturnsInternalServerError()
+        public async Task ValidatePolicyNumber_ReturnsInternalServerError_WhenExceptionThrown()
         {
             // Arrange
             var policyNumber = fixture.Create<int>();
-            userInterface.Setup(u => u.validatePolicyNumber(policyNumber)).ThrowsAsync(new Exception());
+            userInterface.Setup(u => u.ValidatePolicyNumber(policyNumber)).ThrowsAsync(new Exception());
 
             // Act
             var result = await userController.ValidatePolicyNumber(policyNumber);
@@ -136,17 +185,18 @@ namespace AssessmentApiTest
             result.Should().BeOfType<ObjectResult>()
                 .Which.Value.Should().Be("Error occurred when validating  policyNumber");
 
-            userInterface.Verify(t => t.validatePolicyNumber(policyNumber), Times.Once());
+            userInterface.Verify(t => t.ValidatePolicyNumber(policyNumber), Times.Once());
         }
+
         //ValidateChasisNumber
 
         [Fact]
-        public async Task ValidateChasisNumber_WhenValidChasisNumber_ReturnsTrue()
+        public async Task ValidateChasisNumber_ReturnsOkWithTrue_WhenValidChasisNumber()
         {
             // Arrange
             var chasisNumber = fixture.Create<string>();
 
-            userInterface.Setup(u => u.validateChasisNumber(chasisNumber)).ReturnsAsync(true);
+            userInterface.Setup(u => u.ValidateChasisNumber(chasisNumber)).ReturnsAsync(true);
 
             // Act
             var result = await userController.ValidateChasisNumber(chasisNumber);
@@ -156,16 +206,16 @@ namespace AssessmentApiTest
             result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().Be(true);
 
-            userInterface.Verify(t => t.validateChasisNumber(chasisNumber), Times.Once());
+            userInterface.Verify(t => t.ValidateChasisNumber(chasisNumber), Times.Once());
         }
 
         [Fact]
-        public async Task ValidateChasisNumber_WhenInvalidChasisNumber_ReturnsFalse()
+        public async Task ValidateChasisNumber_ReturnsOkWithFalse_WhenInvalidChasisNumber()
         {
             // Arrange
             var chasisNumber = fixture.Create<string>();
 
-            userInterface.Setup(u => u.validateChasisNumber(chasisNumber)).ReturnsAsync(false);
+            userInterface.Setup(u => u.ValidateChasisNumber(chasisNumber)).ReturnsAsync(false);
 
             // Act
             var result = await userController.ValidateChasisNumber(chasisNumber);
@@ -175,15 +225,15 @@ namespace AssessmentApiTest
             result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().Be(false);
 
-            userInterface.Verify(t => t.validateChasisNumber(chasisNumber), Times.Once());
+            userInterface.Verify(t => t.ValidateChasisNumber(chasisNumber), Times.Once());
         }
 
         [Fact]
-        public async Task ValidateChasisNumber_ExceptionThrown_ReturnsInternalServerError()
+        public async Task ValidateChasisNumber_ReturnsInternalServerError_WhenExceptionThrown()
         {
             // Arrange
             var chasisNumber = fixture.Create<string>();
-            userInterface.Setup(u => u.validateChasisNumber(chasisNumber)).ThrowsAsync(new Exception());
+            userInterface.Setup(u => u.ValidateChasisNumber(chasisNumber)).ThrowsAsync(new Exception());
 
             // Act
             var result = await userController.ValidateChasisNumber(chasisNumber);
@@ -193,7 +243,7 @@ namespace AssessmentApiTest
             result.Should().BeOfType<ObjectResult>()
                 .Which.Value.Should().Be("Error occurred when validating  Chasis Number");
 
-            userInterface.Verify(t => t.validateChasisNumber(chasisNumber), Times.Once());
+            userInterface.Verify(t => t.ValidateChasisNumber(chasisNumber), Times.Once());
         }
 
 
@@ -202,44 +252,48 @@ namespace AssessmentApiTest
 
         //AddUserPolicyDetails
         [Fact]
-        public async Task AddUserPolicyDetails_ValiduserPolicyrecords_ReturnsOkWithResult()
+        public async Task AddUserPolicyDetails_ReturnsOkWithResult_WhenValiduserPolicyrecord()
         {
             // Arrange
-            var userpolicyList = fixture.Create<UserPolicyListDto>();
+            var userpolicyListDto = fixture.Create<UserPolicyListDto>();
             var Result = fixture.Create<bool>();
-            userInterface.Setup(u => u.addUserPolicyDetails(userpolicyList)).ReturnsAsync(Result);
+
+            userInterface.Setup(u => u.AddUserPolicyDetails(userpolicyListDto)).ReturnsAsync(Result);
+
 
             // Act
-            var result = await userController.AddUserPolicyDetails(userpolicyList);
+            var result = await userController.AddUserPolicyDetails(userpolicyListDto);
 
             // Assert
             result.Should().NotBeNull().And.BeAssignableTo<IActionResult>();
             result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().Be(Result);
 
-            userInterface.Verify(t => t.addUserPolicyDetails(userpolicyList), Times.Once());
+
+            userInterface.Verify(u => u.AddUserPolicyDetails(userpolicyListDto), Times.Once());
         }
 
         [Fact]
-        public async Task AddUserPolicyDetailsd_ExceptionThrown_ReturnsInternalServerError()
+        public async Task AddUserPolicyDetails_ReturnsInternalServerError_WhenExceptionThrown()
         {
             //Arrange
-            var userpolicyList = fixture.Create<UserPolicyListDto>();
-            var Result = fixture.Create<bool>();
-            userInterface.Setup(u => u.addUserPolicyDetails(userpolicyList)).ThrowsAsync(new Exception());
+            var userpolicyListDto = fixture.Create<UserPolicyListDto>();
+
+
+            userInterface.Setup(u => u.AddUserPolicyDetails(userpolicyListDto)).ThrowsAsync(new Exception());
 
             // Act
-            var result = await userController.AddUserPolicyDetails(userpolicyList);
+            var result = await userController.AddUserPolicyDetails(userpolicyListDto);
 
-          
+
             // Assert
             result.Should().NotBeNull();
             result.Should().BeAssignableTo<ObjectResult>();
             var objectResult = result as ObjectResult;
-            objectResult.StatusCode.Should().Be(500);
-            objectResult.Value.Should().Be("Error occurred when adding UserPolicy list");
+            objectResult?.StatusCode.Should().Be(500);
+            objectResult?.Value.Should().Be("Error occurred when adding UserPolicy list");
 
-            userInterface.Verify(t => t.addUserPolicyDetails(userpolicyList), Times.Once());
+            userInterface.Verify(u => u.AddUserPolicyDetails(userpolicyListDto), Times.Once());
         }
 
 
@@ -247,66 +301,74 @@ namespace AssessmentApiTest
         //GetPolicyNumbers
 
         [Fact]
-        public async Task GetPolicyNumbers_ReturnsPolicyNumbers_WhenResultIsNotNull()
+        public async Task GetPolicyNumbers_ReturnsOkWithPolicyNumbersArray_WhenPolicyNumbersFound()
         {
             // Arrange
             var policyNumbers = fixture.CreateMany<int>();
-            userInterface.Setup(u => u.getPolicyNumbers()).ReturnsAsync(policyNumbers);
+            var userId = fixture.Create<Guid>();
+            
+            userInterface.Setup(u => u.GetPolicyNumbers(userId)).ReturnsAsync(policyNumbers);
 
             // Act
-            var result = await userController.GetPolicyNumbers();
+            var result = await userController.GetPolicyNumbers(userId);
 
             // Assert
             result.Should().NotBeNull().And.BeAssignableTo<IActionResult>();
             result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().BeEquivalentTo(policyNumbers);
 
-            userInterface.Verify(t => t.getPolicyNumbers(), Times.Once());
+            userInterface.Verify(t => t.GetPolicyNumbers(userId), Times.Once());
         }
 
         [Fact]
-        public async Task GetPolicyNumbers_WhenEmptyData_ReturnsOkWithMessage()
+        public async Task GetPolicyNumbers_ReturnsOkWithEmptyArray_WhenNoPolicyNumbersFound()
         {
             // Arrange
-            userInterface.Setup(u => u.getPolicyNumbers()).ReturnsAsync((List<int>)null); 
+
+            var userId = fixture.Create<Guid>();
+  
+            userInterface.Setup(u => u.GetPolicyNumbers(userId)).ReturnsAsync((IEnumerable<int>?)null);
 
             // Act
-            var result = await userController.GetPolicyNumbers();
+            var result = await userController.GetPolicyNumbers(userId);
 
             // Assert
             result.Should().NotBeNull().And.BeAssignableTo<IActionResult>();
             result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().BeEquivalentTo(new { message = "No Content" });
+                .Which.Value.Should().BeEquivalentTo(new int[0]);
 
-            userInterface.Verify(t => t.getPolicyNumbers(), Times.Once());
+
+            userInterface.Verify(t => t.GetPolicyNumbers(userId), Times.Once());
         }
         [Fact]
-        public async Task GetPolicyNumbers_ExceptionThrown_ReturnsInternalServerError()
+        public async Task GetPolicyNumbers_ReturnsInternalServerError_WhenExceptionThrown()
         {
             // Arrange
-            userInterface.Setup(u => u.getPolicyNumbers()).ThrowsAsync(new Exception());
+            var userId = fixture.Create<Guid>();
+            
+            userInterface.Setup(u => u.GetPolicyNumbers(userId)).ThrowsAsync(new Exception());
 
             // Act
-            var result = await userController.GetPolicyNumbers();
+            var result = await userController.GetPolicyNumbers(userId);
 
             // Assert
             result.Should().NotBeNull().And.BeAssignableTo<IActionResult>();
             result.Should().BeOfType<ObjectResult>()
                 .Which.Value.Should().Be("Error occurred when fetching Policy Number");
 
-            userInterface.Verify(t => t.getPolicyNumbers(), Times.Once());
+            userInterface.Verify(t => t.GetPolicyNumbers(userId), Times.Once());
 
         }
 
         //GetInsuredDetails
 
         [Fact]
-        public async Task GetInsuredDetails_ValidData_ReturnsOkWithResult()
+        public async Task GetInsuredDetails_ReturnsOkWithInsuredDetails_WhenValidPolicyNumber()
         {
             // Arrange
-            var policyNumber = fixture.Create<int>(); 
-            var insuredDetails = fixture.Create<object>(); 
-            userInterface.Setup(u => u.getInsuredDetails(policyNumber)).ReturnsAsync(insuredDetails);
+            var policyNumber = fixture.Create<int>();
+            var insuredDetails = fixture.Create<object>();
+            userInterface.Setup(u => u.GetInsuredDetails(policyNumber)).ReturnsAsync(insuredDetails);
 
             // Act
             var result = await userController.GetInsuredDetails(policyNumber);
@@ -316,16 +378,16 @@ namespace AssessmentApiTest
             result.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().BeEquivalentTo(insuredDetails);
 
-            userInterface.Verify(t => t.getInsuredDetails(policyNumber), Times.Once());
+            userInterface.Verify(t => t.GetInsuredDetails(policyNumber), Times.Once());
 
         }
 
         [Fact]
-        public async Task GetInsuredDetails_ExceptionThrown_ReturnsInternalServerError()
+        public async Task GetInsuredDetails_ReturnsInternalServerError_ExceptionThrown()
         {
             // Arrange
             var policyNumber = fixture.Create<int>();
-            userInterface.Setup(u => u.getInsuredDetails(policyNumber)).ThrowsAsync(new Exception());
+            userInterface.Setup(u => u.GetInsuredDetails(policyNumber)).ThrowsAsync(new Exception());
 
             // Act
             var result = await userController.GetInsuredDetails(policyNumber);
@@ -336,48 +398,47 @@ namespace AssessmentApiTest
                 .Which.Value.Should().Be("Error occurred when fetching Insured Details");
 
 
-            userInterface.Verify(t => t.getInsuredDetails(policyNumber), Times.Once());
+            userInterface.Verify(t => t.GetInsuredDetails(policyNumber), Times.Once());
         }
 
         //DeleteUserPolicyRecord
 
         [Fact]
-        public async Task DeleteUserPolicyRecord_ValidPolicyNumber_ReturnsOkWithResult()
+        public async Task DeleteUserPolicyRecord_ReturnsOkWithResult_WhenDeleteSucceeds()
         {
             // Arrange
-            var policyNumber = fixture.Create<int>(); 
-            var deletionResult = fixture.Create<bool>(); 
-            userInterface.Setup(u => u.deleteUserPolicy(policyNumber)).ReturnsAsync(deletionResult);
+            var userPolicyListDto = fixture.Create<UserPolicyListDto>();
+            var deletionResult = fixture.Create<bool>();
+
+            userInterface.Setup(u => u.DeleteUserPolicy(userPolicyListDto)).ReturnsAsync(deletionResult);
 
             // Act
-            var result = await userController.DeleteUserPolicyRecord(policyNumber);
+            var result = await userController.DeleteUserPolicyRecord(userPolicyListDto);
 
             // Assert
-            result.Should().NotBeNull().And.BeAssignableTo<IActionResult>();
-            result.Should().BeOfType<OkObjectResult>()
-                .Which.Value.Should().Be(deletionResult);
-
-            userInterface.Verify(t => t.deleteUserPolicy(policyNumber), Times.Once());
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            okResult.Value.Should().Be(deletionResult);
+           
+            userInterface.Verify(t => t.DeleteUserPolicy(userPolicyListDto), Times.Once());
         }
 
         [Fact]
-        public async Task DeleteUserPolicyRecord_ExceptionThrown_ReturnsInternalServerError()
+        public async Task DeleteUserPolicyRecord_ReturnsInternalServerError_WhenExceptionThrown()
         {
             // Arrange
-            var policyNumber = fixture.Create<int>();
-            userInterface.Setup(u => u.deleteUserPolicy(policyNumber)).ThrowsAsync(new Exception());
+            var userPolicyListDto = fixture.Create<UserPolicyListDto>();
+
+            userInterface.Setup(u => u.DeleteUserPolicy(userPolicyListDto)).ThrowsAsync(new Exception());
 
             // Act
-            var result = await userController.DeleteUserPolicyRecord(policyNumber);
+            var result = await userController.DeleteUserPolicyRecord(userPolicyListDto);
 
             // Assert
-            result.Should().NotBeNull();
-            result.Should().BeAssignableTo<ObjectResult>();
-            var objectResult = result as ObjectResult;
+            var objectResult = Assert.IsType<ObjectResult>(result);
             objectResult.StatusCode.Should().Be(500);
             objectResult.Value.Should().Be("Error occurred when deleting user policy record");
 
-            userInterface.Verify(t => t.deleteUserPolicy(policyNumber), Times.Once());
+            userInterface.Verify(t => t.DeleteUserPolicy(userPolicyListDto), Times.Once());
         }
 
 
